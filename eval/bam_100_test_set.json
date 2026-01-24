@@ -1,0 +1,820 @@
+{
+  "metadata": {
+    "name": "Bambara TTS Evaluation Test Set ",
+    "version": "1.0",
+    "language": "Bambara (Bamanankan)",
+    "language_code": "bm",
+    "description": "100-sample test set for evaluating Bambara TTS systems",
+    "total_sentences": 100,
+    "created_date": "2025-01-20",
+    "source": "Manually created_date : (Seydou DIALLO)"
+  },
+
+  "categories": {
+    "phonetic_coverage": {
+      "special_characters": [
+        {
+          "id": "SC001",
+          "text": "Ɲɛnamaya ka di kosɛbɛ.",
+          "translation": "Life is very pleasant.",
+          "target_sounds": ["ɲ", "ɛ"],
+          "difficulty": "medium"
+        },
+        {
+          "id": "SC004",
+          "text": "Ŋɔmi ye dumuni ɲuman ye wa a kadi kosɛbɛ.",
+          "translation": "Ŋɔmi is a good food and it's so good.",
+          "target_sounds": ["ŋ", "ɲ"],
+          "difficulty": "hard"
+        },
+        {
+          "id": "SC005",
+          "text": "Bɛɛ ye ɲɔgɔn dɛmɛ.",
+          "translation": "Everyone helps each other.",
+          "target_sounds": ["ɛ", "ɲ", "ɔ"],
+          "difficulty": "medium"
+        },
+        {
+          "id": "SC008",
+          "text": "Kɔnɔ bɛ yiri kan.",
+          "translation": "The bird is on the tree.",
+          "target_sounds": ["ɔ"],
+          "difficulty": "easy"
+        },
+        {
+          "id": "SC010",
+          "text": "Ŋanaya kɔrɔ ka can.",
+          "translation": "Skill has many meanings.",
+          "target_sounds": ["ŋ", "ɔ"],
+          "difficulty": "hard"
+        }
+      ],
+
+      "tonal_patterns": [
+        {
+          "id": "TP001",
+          "text": "Baa bɛ ba kɔnɔ.",
+          "translation": "The goat is in the river.",
+          "tonal_note": "ba (goat) vs ba (river) - tonal minimal pair",
+          "difficulty": "hard"
+        },
+        {
+          "id": "TP003",
+          "text": "Da ye da datugu.",
+          "translation": "The mouth closed the door.",
+          "tonal_note": "da (mouth) vs da (door)",
+          "difficulty": "hard"
+        },
+        {
+          "id": "TP006",
+          "text": "Fɛn bɛɛ ka kan ka kɛ a kɛ waati la.",
+          "translation": "Everything should be done at its time.",
+          "tonal_note": "Complex tonal sentence",
+          "difficulty": "hard"
+        },
+        {
+          "id": "TP008",
+          "text": "Kungokɔnɔna ni dugukɔnɔna tɛ kelen ye.",
+          "translation": "The bush and the village are not the same.",
+          "tonal_note": "Contrasting locations",
+          "difficulty": "hard"
+        }
+      ],
+
+      "nasal_vowels": [
+        {
+          "id": "NV001",
+          "text": "Sanfɛ mɔgɔw bɛ an dɛmɛ.",
+          "translation": "The persons above helps us.",
+          "target_sounds": ["an"],
+          "difficulty": "medium"
+        },
+        {
+          "id": "NV003",
+          "text": "Anw bɛ taa sini.",
+          "translation": "We are going tomorrow.",
+          "target_sounds": ["anw"],
+          "difficulty": "easy"
+        },
+        {
+          "id": "NV005",
+          "text": "Kungokɔnɔfɛnw bɛ kungo kɔnɔ.",
+          "translation": "Wild animals are in the bush.",
+          "target_sounds": ["ung", "ong"],
+          "difficulty": "hard"
+        }
+      ],
+
+      "vowel_length": [
+        {
+          "id": "VL001",
+          "text": "A taara dugu kɔnɔ.",
+          "translation": "He/she went to the village.",
+          "vowel_note": "Long 'aa' in taara",
+          "difficulty": "medium"
+        },
+        {
+          "id": "VL004",
+          "text": "Maa min ye baara kɛ, o ye a sɔrɔ.",
+          "translation": "The person who worked obtained it.",
+          "vowel_note": "Long vowels in maa and baara",
+          "difficulty": "hard"
+        },
+        {
+          "id": "VL006",
+          "text": "Wulu bɛ ka woo woo ci so kɔfɛ.",
+          "translation": "The dog is barking behind the house.",
+          "vowel_note": "Long  'oo'",
+          "difficulty": "hard"
+        }
+      ],
+
+      "consonant_clusters": [
+        {
+          "id": "CC001",
+          "text": "Lemuru bɛ sɔrɔ sugu la.",
+          "translation": "Oranges can be found at the market.",
+          "target_cluster": "le",
+          "difficulty": "medium"
+        },
+        {
+          "id": "CC003",
+          "text": "Mɛtɛrɛ bɛ kɛ ka sumali kɛ.",
+          "translation": "TThe meter is used to measure",
+          "target_cluster": "mɛ",
+          "difficulty": "easy"
+        },
+        {
+          "id": "CC005",
+          "text": "Nkɔni dɔnkili ka di kosɛbɛ.",
+          "translation": "Nkoni music is very pleasant.",
+          "target_cluster": "nk",
+          "difficulty": "medium"
+        }
+      ]
+    },
+
+    "sentence_types": {
+      "declarative": [
+        {
+          "id": "DE001",
+          "text": "Ne tɔgɔ ye Amadu ye.",
+          "translation": "My name is Amadou.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "DE002",
+          "text": "Bamako ye Mali ka duguba ye.",
+          "translation": "Bamako is Mali's capital city.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "DE005",
+          "text": "Mali ye jamana ɲuman ye Farafinna kɔnɔ.",
+          "translation": "Mali is a good country in Africa.",
+          "difficulty": "medium"
+        },
+        {
+          "id": "DE008",
+          "text": "Bamanankan ye kan ɲuman ye.",
+          "translation": "Bambara is a beautiful language.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "DE009",
+          "text": "Ni kɛnɛya tɛ, fɛn foyi tɛ.",
+          "translation": "Without health, there is nothing.",
+          "difficulty": "medium"
+        }
+      ],
+
+      "questions": [
+        {
+          "id": "QU001",
+          "text": "I ka kɛnɛ wa?",
+          "translation": "How are you?",
+          "question_type": "yes_no",
+          "difficulty": "easy"
+        },
+        {
+          "id": "QU002",
+          "text": "I tɔgɔ ye di?",
+          "translation": "What is your name?",
+          "question_type": "wh_question",
+          "difficulty": "easy"
+        },
+        {
+          "id": "QU005",
+          "text": "Mun na i ma na kunun?",
+          "translation": "Why didn't you come yesterday?",
+          "question_type": "wh_question",
+          "difficulty": "medium"
+        },
+        {
+          "id": "QU007",
+          "text": "Jɔn bɛ yen?",
+          "translation": "Who is there?",
+          "question_type": "wh_question",
+          "difficulty": "easy"
+        },
+        {
+          "id": "QU008",
+          "text": "A bɛ se ka kɛ cogo di?",
+          "translation": "How can it be done?",
+          "question_type": "wh_question",
+          "difficulty": "medium"
+        }
+      ],
+
+      "commands": [
+        {
+          "id": "CM001",
+          "text": "Na yan!",
+          "translation": "Come here!",
+          "difficulty": "easy"
+        },
+        {
+          "id": "CM003",
+          "text": "Aw ye ɲɔgɔn dɛmɛ!",
+          "translation": "Help each other!",
+          "difficulty": "medium"
+        },
+        {
+          "id": "CM007",
+          "text": "I kana o kɛ!",
+          "translation": "Don't do that!",
+          "difficulty": "easy"
+        },
+        {
+          "id": "CM008",
+          "text": "An ka taa!",
+          "translation": "Let's go!",
+          "difficulty": "easy"
+        },
+        {
+          "id": "CM010",
+          "text": "Aw ye jɛ ka ɲɔgɔn faamu!",
+          "translation": "Unite and understand each other!",
+          "difficulty": "medium"
+        }
+      ],
+
+      "exclamations": [
+        {
+          "id": "EX001",
+          "text": "Awɔ! A ka di!",
+          "translation": "Yes! It's nice!",
+          "emotion": "joy",
+          "difficulty": "easy"
+        },
+        {
+          "id": "EX002",
+          "text": "Ala ka bon!",
+          "translation": "God is great!",
+          "emotion": "reverence",
+          "difficulty": "easy"
+        },
+        {
+          "id": "EX005",
+          "text": "Ne nisɔndiyara kosɛbɛ!",
+          "translation": "I am very happy!",
+          "emotion": "happiness",
+          "difficulty": "medium"
+        },
+        {
+          "id": "EX006",
+          "text": "Kabako!",
+          "translation": "What a surprise!",
+          "emotion": "surprise",
+          "difficulty": "easy"
+        }
+      ],
+
+      "lists": [
+        {
+          "id": "LS001",
+          "text": "Ne bɛ: malo ni tiga de fɛ.",
+          "translation": "I want: rice and peanuts.",
+          "difficulty": "medium"
+        },
+        {
+          "id": "LS004",
+          "text": "Kelen, fila, saba, naani, duuru.",
+          "translation": "One, two, three, four, five.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "LS006",
+          "text": "Ntɛnɛn, tarata, araba, alamusa, juma.",
+          "translation": "Monday, Tuesday, Wednesday, Thursday, Friday.",
+          "difficulty": "medium"
+        }
+      ],
+
+      "long_sentences": [
+        {
+          "id": "LO001",
+          "text": "Ni mɔgɔ bɛ baara kɛ ka ɲɛ ani ka jɛ ni a tɔɲɔgɔnw ye, o tigi bɛ se ka sɔrɔba kɛ kosɛbɛ a ka ɲɛnamaya kɔnɔ.",
+          "translation": "If a person works well and cooperates with their colleagues, that person can achieve a lot in their life.",
+          "word_count": 26,
+          "difficulty": "hard"
+        },
+        {
+          "id": "LO003",
+          "text": "Kalan ye fɛn nafaman ye kosɛbɛ denw ma, sabu a bɛ u dɛmɛ ka dɔnniya sɔrɔ ani ka baara ɲuman sɔrɔ sini.",
+          "translation": "Education is very valuable for children because it helps them gain knowledge and find good jobs in the future.",
+          "word_count": 23,
+          "difficulty": "hard"
+        }
+      ],
+
+      "short_sentences": [
+        {
+          "id": "SH001",
+          "text": "Ayi.",
+          "translation": "Yes.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "SH002",
+          "text": "Ayi n tɛ.",
+          "translation": "No.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "SH004",
+          "text": "Taa!",
+          "translation": "Go!",
+          "difficulty": "easy"
+        },
+        {
+          "id": "SH006",
+          "text": "N bɛ a fɛ.",
+          "translation": "I want it.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "SH008",
+          "text": "Jɔn?",
+          "translation": "Who?",
+          "difficulty": "easy"
+        }
+      ]
+    },
+
+    "text_normalization": {
+      "numbers_dates": [
+        {
+          "id": "ND001",
+          "text": "Ne si ye san 25.",
+          "translation": "I am 25 years old.",
+          "normalization_type": "cardinal_number",
+          "difficulty": "medium"
+        },
+        {
+          "id": "ND003",
+          "text": "A Sɔngɔ ye 50,000.",
+          "translation": "The price is 50,000.",
+          "normalization_type": "currency",
+          "difficulty": "hard"
+        },
+        {
+          "id": "ND004",
+          "text": "8:30 de bɛ yen.",
+          "translation": "It's 8:30.",
+          "normalization_type": "time",
+          "difficulty": "medium"
+        },
+        {
+          "id": "ND006",
+          "text": "Ne ka telefɔni nimero ye 76 45 32 10.",
+          "translation": "My phone number is 76 45 32 10.",
+          "normalization_type": "phone_number",
+          "difficulty": "hard"
+        }
+      ],
+
+      "abbreviations": [
+        {
+          "id": "AB001",
+          "text": "M. Tarawere nana.",
+          "translation": "Mr. Traoré came.",
+          "normalization_type": "title",
+          "difficulty": "easy"
+        },
+        {
+          "id": "AB002",
+          "text": "Bi ye 10.01.2026.",
+          "translation": "Today is 10.01.2026.",
+          "normalization_type": "Date",
+          "difficulty": "medium"
+        },
+        {
+          "id": "AB004",
+          "text": "5 km ",
+          "translation": "5 kilometers.",
+          "normalization_type": "unit",
+          "difficulty": "medium"
+        }
+      ],
+
+      "foreign_words_french": [
+        {
+          "id": "FW001",
+          "text": "Aviyɔn bɛ na bi.",
+          "translation": "The plane is coming today.",
+          "french_word": "avion",
+          "difficulty": "medium"
+        },
+        {
+          "id": "FW003",
+          "text": "Lekɔli bɛ dayɛlɛ sini.",
+          "translation": "School opens tomorrow.",
+          "french_word": "l'école",
+          "difficulty": "easy"
+        },
+        {
+          "id": "FW006",
+          "text": "Ɔridinatɛri tiɲɛna.",
+          "translation": "The computer is broken.",
+          "french_word": "ordinateur",
+          "difficulty": "medium"
+        },
+        {
+          "id": "FW008",
+          "text": "Lopitali ka jan dugu la.",
+          "translation": "The hospital is far from the village.",
+          "french_word": "l'hôpital",
+          "difficulty": "medium"
+        }
+      ],
+
+      "code_switching": [
+        {
+          "id": "CS001",
+          "text": "N bɛ penser trop",
+          "translation": "I think a lot",
+          "code_switch_type": "verb",
+          "difficulty": "hard"
+        },
+        {
+          "id": "CS002",
+          "text": "C'est bon, an ka taa.",
+          "translation": "It's good, let's go.",
+          "code_switch_type": "phrase",
+          "difficulty": "hard"
+        },
+        {
+          "id": "CS005",
+          "text": "Vraiment, Nin ko in ka gɛlɛn kosɛbɛ.",
+          "translation": "Really, this is very difficult.",
+          "code_switch_type": "adverb",
+          "difficulty": "hard"
+        }
+      ],
+
+      "punctuation": [
+        {
+          "id": "PU001",
+          "text": "A y'a fɔ: \"N bɛna na sini.\"",
+          "translation": "He said: \"I will come tomorrow.\"",
+          "punctuation_type": "quotes",
+          "difficulty": "medium"
+        },
+        {
+          "id": "PU004",
+          "text": "E! I ma a faamu wa?!",
+          "translation": "Hey! Didn't you understand?!",
+          "punctuation_type": "multiple_punctuation",
+          "difficulty": "medium"
+        }
+      ]
+    },
+
+    "prosodic_phenomena": {
+      "phrasing": [
+        {
+          "id": "PH001",
+          "text": "Den min nana, o ye ne balimakɛ ye.",
+          "translation": "The child who came is my brother.",
+          "pause_location": "after 'nana'",
+          "difficulty": "medium"
+        },
+        {
+          "id": "PH002",
+          "text": "Ni sanji nana, an bɛna sɛnɛ kɛ.",
+          "translation": "If rain comes, we will farm.",
+          "pause_location": "after 'nana'",
+          "difficulty": "medium"
+        },
+        {
+          "id": "PH005",
+          "text": "Ka tiɲɛn yɛrɛ fɔ, ne tun t'a dɔn.",
+          "translation": "To tell the truth, I didn't know.",
+          "pause_location": "after 'fɔ'",
+          "difficulty": "medium"
+        }
+      ],
+
+      "emphasis": [
+        {
+          "id": "EM001",
+          "text": "NE de y'a kɛ, mɔgɔ si tɛ.",
+          "translation": "I did it, not anyone else.",
+          "emphasis_on": "NE",
+          "difficulty": "medium"
+        },
+        {
+          "id": "EM004",
+          "text": "O de y'a ɲɛfɔli cogo ye.",
+          "translation": "THAT is the explanation.",
+          "emphasis_on": "O",
+          "difficulty": "easy"
+        }
+      ],
+
+      "boundary_tones": [
+        {
+          "id": "BT001",
+          "text": "A bɛna na.",
+          "translation": "He will come.",
+          "intonation": "falling_declarative",
+          "difficulty": "easy"
+        },
+        {
+          "id": "BT002",
+          "text": "A bɛna na wa?",
+          "translation": "Will he come?",
+          "intonation": "rising_question",
+          "difficulty": "easy"
+        },
+        {
+          "id": "BT004",
+          "text": "A bɛna na!",
+          "translation": "He will come!",
+          "intonation": "emphatic_falling",
+          "difficulty": "easy"
+        }
+      ]
+    },
+
+    "domain_coverage": {
+      "greetings": [
+        {
+          "id": "GD001",
+          "text": "Aw ni ce.",
+          "translation": "Hello (to multiple people).",
+          "difficulty": "easy"
+        },
+        {
+          "id": "GD005",
+          "text": "I ka kɛnɛ wa?",
+          "translation": "How are you?",
+          "difficulty": "easy"
+        },
+        {
+          "id": "GD006",
+          "text": "Basi tɛ, Ala ka a yafa.",
+          "translation": "No problem, may God forgive.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "GD008",
+          "text": "Ka an bɛn.",
+          "translation": "Goodbye (go in peace).",
+          "difficulty": "easy"
+        }
+      ],
+
+      "news_formal": [
+        {
+          "id": "NF001",
+          "text": "Jamanakuntigi ye kuma dɔ fɔ jamana bɛɛ ye bi.",
+          "translation": "The president addressed a message to the entire nation today.",
+          "difficulty": "medium"
+        },
+        {
+          "id": "NF005",
+          "text": "Ɲɛnajɛba dɔ daminɛna Bamako kɔnɔ bi sɔgɔmada in na.",
+          "translation": "A major party began in Bamako this morning.",
+          "difficulty": "medium"
+        }
+      ],
+
+      "educational": [
+        {
+          "id": "ED001",
+          "text": "Kalan ye dɔnniya daminɛ ye.",
+          "translation": "Education is the beginning of knowledge.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "ED004",
+          "text": "Fila ni fila ye naani ye.",
+          "translation": "Two plus two equals four.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "ED006",
+          "text": "Mali ye a ka yɛrɛmahɔrɔnya sɔrɔ san 1960.",
+          "translation": "Mali gained its independence in 1960.",
+          "difficulty": "medium"
+        }
+      ],
+
+      "healthcare": [
+        {
+          "id": "HC001",
+          "text": "Ji min nafa ka bon kɛnɛya ko la.",
+          "translation": "Drinking water is good for health.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "HC002",
+          "text": "I ka kan ka taa dɔkɔtɔrɔ fɛ ni i banannen don.",
+          "translation": "You should go to the doctor if you are sick.",
+          "difficulty": "medium"
+        },
+        {
+          "id": "HC004",
+          "text": "Boloci bɛ se ka den tanga bana caman ma.",
+          "translation": "Vaccination can protect children from many diseases.",
+          "difficulty": "medium"
+        }
+      ],
+
+      "technical": [
+        {
+          "id": "TI001",
+          "text": "Telefɔni dayɛlɛ, i ka butɔn digi.",
+          "translation": "To turn on the phone, press the button",
+          "difficulty": "medium"
+        },
+        {
+          "id": "TI002",
+          "text": "Fɔlɔ, i ka ji bila daga kɔnɔ.",
+          "translation": "First, put water in the pot.",
+          "difficulty": "easy"
+        }
+      ],
+
+      "proverbs": [
+        {
+          "id": "PR001",
+          "text": "Bolo kelen tɛ se ka bɛlɛ ta",
+          "translation": "One hand cannot take a stone.",
+          "meaning": "Cooperation is necessary",
+          "difficulty": "medium"
+        },
+        {
+          "id": "PR002",
+          "text": "Kuma ye sɔrɔ ye.",
+          "translation": "Speaking is earning.",
+          "meaning": "Communication brings rewards",
+          "difficulty": "easy"
+        },
+        {
+          "id": "PR006",
+          "text": "Waati ye fura ye.",
+          "translation": "Time is medicine.",
+          "meaning": "Time heals",
+          "difficulty": "easy"
+        },
+        {
+          "id": "PR007",
+          "text": "Muɲu ka fisa ni kɛlɛ ye.",
+          "translation": "Patience is better than war.",
+          "meaning": "Peace over conflict",
+          "difficulty": "easy"
+        },
+        {
+          "id": "PR009",
+          "text": "Sira ka jan, nka a bɛ ban.",
+          "translation": "The road is long, but it ends.",
+          "meaning": "Perseverance leads to success",
+          "difficulty": "medium"
+        }
+      ],
+
+      "names_places": [
+        {
+          "id": "NP001",
+          "text": "Modibo Keyita ye Mali jamanakuntigi fɔlɔfɔlɔ ye.",
+          "translation": "Modibo Keïta was Mali's first president.",
+          "difficulty": "medium"
+        },
+        {
+          "id": "NP002",
+          "text": "Joliba ye ba ba ye Mali kɔnɔ.",
+          "translation": "The Niger River is the big river in Mali.",
+          "difficulty": "medium"
+        },
+        {
+          "id": "NP004",
+          "text": "Tɔbuktu ye dugu kɔrɔba ye Mali kɔnɔ.",
+          "translation": "Timbuktu is an ancient city in Mali.",
+          "difficulty": "medium"
+        }
+      ]
+    },
+
+    "edge_cases": {
+      "very_long": [
+        {
+          "id": "VL001",
+          "text": "Ni an bɛɛ jɛra ka baara kɛ ɲɔgɔn fɛ, ka ɲɔgɔn dɛmɛ ko bɛɛ la, ka ɲɔgɔn faamu fana, an bɛ se ka fɛn caman kɛ an ka dugu yiriwali kama, an ka jamana yiriwali kama fana, sabu jɛkulu fanga ka bon ni mɔgɔ kelen ta ye.",
+          "translation": "If we all unite to work together, to help each other in everything, and to understand each other also, we can do many things for the development of our village, for the development of our country also, because collective strength is greater than individual.",
+          "word_count": 52,
+          "difficulty": "very_hard"
+        }
+      ],
+
+      "very_short": [
+        {
+          "id": "VS001",
+          "text": "Ɔ.",
+          "translation": "Oh.",
+          "difficulty": "easy"
+        },
+        {
+          "id": "VS002",
+          "text": "Ɛ̃?",
+          "translation": "Huh?",
+          "difficulty": "easy"
+        },
+        {
+          "id": "VS005",
+          "text": "É!",
+          "translation": "Hey!",
+          "difficulty": "easy"
+        }
+      ],
+
+      "rare_words": [
+        {
+          "id": "RW001",
+          "text": "Ntolatan bɛ kɛ sini.",
+          "translation": "Football will take place tomorrow.",
+          "difficulty": "hard"
+        },
+        {
+          "id": "RW004",
+          "text": "Dɔnibaga kɛlɛn bɛ yan.",
+          "translation": "A great scientist is here.",
+          "rare_element": "dɔnniyaba",
+          "difficulty": "hard"
+        }
+      ],
+
+      "homophones": [
+        {
+          "id": "HO001",
+          "text": "Da ye da la da kɔnɔ.",
+          "translation": "The mouth spoke of the door inside.",
+          "homophone_set": "da (mouth/door/to speak)",
+          "difficulty": "very_hard"
+        },
+        {
+          "id": "HO003",
+          "text": "Kɔ ka jan, kɔ filɛ kɔ la.",
+          "translation": "The stream is long, look at the stream behind.",
+          "homophone_set": "kɔ (stream/back/behind)",
+          "difficulty": "hard"
+        }
+      ],
+
+      "repetition": [
+        {
+          "id": "RE002",
+          "text": "Dɔɔnin dɔɔnin de ye fɛn bɛɛ ye",
+          "translation": "Little by little is everything",
+          "difficulty": "medium"
+        },
+        {
+          "id": "RE004",
+          "text": "A ka ɲi, a ka ɲi kosɛbɛ.",
+          "translation": "It's good, it's very good.",
+          "difficulty": "medium"
+        }
+      ]
+    }
+  },
+
+  "summary": {
+    "total_samples": 100,
+    "by_category": {
+      "phonetic_coverage": 20,
+      "sentence_types": 32,
+      "text_normalization": 16,
+      "prosodic_phenomena": 10,
+      "domain_coverage": 18,
+      "edge_cases": 10
+    },
+    "by_difficulty": {
+      "easy": 38,
+      "medium": 42,
+      "hard": 17,
+      "very_hard": 3
+    }
+  }
+}
