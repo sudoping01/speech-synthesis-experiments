@@ -1,0 +1,2 @@
+gradio
+git+https://github.com/MALIBA-AI/bambara-tts
