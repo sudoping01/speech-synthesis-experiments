@@ -1,5 +1,4 @@
 
-
 import gradio as gr
 import json
 import csv
@@ -9,14 +8,9 @@ from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 
 
-try:
-    from maliba_ai.tts.inference import BambaraTTSInference
-    from maliba_ai.config.settings import Speakers
-    TTS_AVAILABLE = True
-    print("✓ MALIBA-AI TTS loaded")
-except ImportError:
-    TTS_AVAILABLE = False
-    print("⚠ MALIBA-AI TTS not available - demo mode active")
+from maliba_ai.tts.inference import BambaraTTSInference
+from maliba_ai.config.settings import Speakers
+
 
 SPEAKERS = {
     "Bourama": "Most stable and accurate",
@@ -33,6 +27,9 @@ SPEAKERS = {
 
 SPEAKER_LIST = list(SPEAKERS.keys())
 
+EXPORT_DIR = Path("./exports")
+STATE_FILE = Path("./evaluation_state.json")
+
 
 class AppState:
     def __init__(self):
@@ -40,13 +37,12 @@ class AppState:
         self.current_idx: int = 0
         self.scores: Dict[str, Dict[str, Dict]] = {} 
         self.audio_cache: Dict[str, Dict[str, Tuple]] = {} 
+        self.dataset_path: Optional[str] = None
         self.tts = None
         
-        if TTS_AVAILABLE:
-            try:
-                self.tts = BambaraTTSInference()
-            except Exception as e:
-                print(f"TTS init error: {e}")
+        EXPORT_DIR.mkdir(exist_ok=True)
+        self.tts = BambaraTTSInference()
+
     
     def load_dataset(self, filepath: str) -> str:
         try:
@@ -54,6 +50,7 @@ class AppState:
                 data = json.load(f)
             
             self.samples = []
+            self.dataset_path = filepath
             
             if "categories" in data:
                 for cat_name, cat_data in data["categories"].items():
@@ -80,8 +77,12 @@ class AppState:
                             "difficulty": item.get("difficulty", "medium")
                         })
             
-            self.current_idx = 0
-            return f"✓ Loaded {len(self.samples)} samples"
+            restored = self._load_state()
+            if not restored:
+                self.current_idx = 0
+            
+            restore_msg = f" (restored {len(self.scores)} scores)" if restored else ""
+            return f"✓ Loaded {len(self.samples)} samples{restore_msg}"
         except Exception as e:
             return f"✗ Error: {e}"
     
@@ -151,6 +152,7 @@ class AppState:
                 "notes": notes,
                 "timestamp": datetime.now().isoformat()
             }
+            self._save_state()
     
     def get_score(self, speaker: str) -> Tuple[int, str]:
         sample = self.get_sample()
@@ -159,13 +161,51 @@ class AppState:
             return data.get("score", 3), data.get("notes", "")
         return 3, ""
     
+    def _save_state(self):
+        try:
+            state_data = {
+                "last_saved": datetime.now().isoformat(),
+                "current_idx": self.current_idx,
+                "scores": self.scores,
+                "dataset_path": self.dataset_path
+            }
+            with open(STATE_FILE, 'w', encoding='utf-8') as f:
+                json.dump(state_data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"Auto-save failed: {e}")
+    
+    def _load_state(self) -> bool:
+        if STATE_FILE.exists():
+            try:
+                with open(STATE_FILE, 'r', encoding='utf-8') as f:
+                    state_data = json.load(f)
+                self.scores = state_data.get("scores", {})
+                self.current_idx = state_data.get("current_idx", 0)
+                if self.current_idx >= len(self.samples):
+                    self.current_idx = 0
+                print(f"✓ Restored {len(self.scores)} scored samples")
+                return len(self.scores) > 0
+            except Exception as e:
+                print(f"Failed to load state: {e}")
+        return False
+    
+    def clear_state(self):
+        if STATE_FILE.exists():
+            try:
+                STATE_FILE.unlink()
+            except Exception as e:
+                print(f"Failed to delete state: {e}")
+        self.scores = {}
+        self.current_idx = 0
+        self.audio_cache = {}
+    
     def export_csv(self) -> str:
-        filepath = f"/tmp/bambara_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        filepath = EXPORT_DIR / f"bambara_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         sample_lookup = {s['id']: s for s in self.samples}
         
         with open(filepath, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            writer.writerow(['sample_id', 'speaker', 'score', 'notes', 'text', 'translation', 'difficulty'])
+            writer.writerow(['sample_id', 'speaker', 'score', 'notes', 'text', 'translation', 'difficulty', 'timestamp'])
             
             for sample_id, speakers in self.scores.items():
                 sample = sample_lookup.get(sample_id, {})
@@ -173,13 +213,13 @@ class AppState:
                     writer.writerow([
                         sample_id, speaker, data['score'], data.get('notes', ''),
                         sample.get('text', ''), sample.get('translation', ''),
-                        sample.get('difficulty', '')
+                        sample.get('difficulty', ''), data.get('timestamp', '')
                     ])
         
-        return filepath
+        return str(filepath)
     
     def export_json(self) -> str:
-        filepath = f"/tmp/bambara_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        filepath = EXPORT_DIR / f"bambara_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         
         export_data = {
             "export_time": datetime.now().isoformat(),
@@ -192,7 +232,7 @@ class AppState:
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(export_data, f, ensure_ascii=False, indent=2)
         
-        return filepath
+        return str(filepath)
     
     def progress_stats(self) -> str:
         total = len(self.samples)
@@ -217,7 +257,7 @@ def load_data(file):
             sample['text'],
             sample.get('translation', ''),
             f"{sample['id']} | {sample.get('category', '')} | {sample.get('difficulty', '')}",
-            0,
+            state.current_idx,
             state.progress_stats()
         )
     return msg, "", "", "", 0, state.progress_stats()
@@ -225,6 +265,7 @@ def load_data(file):
 
 def navigate(direction: int):
     state.current_idx = max(0, min(len(state.samples) - 1, state.current_idx + direction))
+    state._save_state()
     sample = state.get_sample()
     
     if sample:
@@ -249,6 +290,11 @@ def navigate_next():
 def jump_to(idx: int):
     state.current_idx = max(0, min(len(state.samples) - 1, int(idx)))
     return navigate(0)
+
+
+def clear_progress():
+    state.clear_state()
+    return "✓ Progress cleared", state.progress_stats()
 
 
 def generate_Bourama(temp, top_k, top_p, max_tokens):
@@ -323,6 +369,7 @@ def save_Bourama(score, notes):
 def save_Adama(score, notes):
     state.save_score("Adama", int(score), notes or "")
     return "✓ Saved score for Adama", state.progress_stats()
+
 def save_Moussa(score, notes):
     state.save_score("Moussa", int(score), notes or "")
     return "✓ Saved score for Moussa", state.progress_stats()
@@ -330,6 +377,7 @@ def save_Moussa(score, notes):
 def save_Modibo(score, notes):
     state.save_score("Modibo", int(score), notes or "")
     return "✓ Saved score for Modibo", state.progress_stats()
+
 def save_Seydou(score, notes):
     state.save_score("Seydou", int(score), notes or "")
     return "✓ Saved score for Seydou", state.progress_stats()
@@ -370,26 +418,32 @@ SAVE_FUNCTIONS = {
 
 
 def export_results_csv():
+    if len(state.scores) == 0:
+        return None
     return state.export_csv()
 
 
 def export_results_json():
+    if len(state.scores) == 0:
+        return None
     return state.export_json()
-
 
 
 def create_app():
     with gr.Blocks(title="Bambara TTS Eval") as app:
         
         gr.Markdown("""
-        #  MALIBA-AI Bambara TTS Evaluation
+        # MALIBA-AI Bambara TTS Evaluation
         **Load → Generate → Listen → Score → Navigate → Export**
+        
+        *Auto-save enabled: Your progress is saved automatically after each score.*
         """)
         
         with gr.Row():
             with gr.Column(scale=2):
-                file_input = gr.File(label=" Upload Test Dataset (JSON)", file_types=[".json"])
+                file_input = gr.File(label="📁 Upload Test Dataset (JSON)", file_types=[".json"])
                 load_status = gr.Textbox(label="Status", interactive=False)
+                clear_btn = gr.Button("🗑️ Clear Saved Progress", size="sm")
             
             with gr.Column(scale=1):
                 gr.Markdown("**Generation Parameters**")
@@ -420,7 +474,7 @@ def create_app():
                     gr.Markdown(f"**{speaker}** - {desc}")
                     
                     gen_btn = gr.Button("🎵 Generate Audio", variant="primary")
-                    audio_out = gr.Audio(label=f"Audio", interactive=False)
+                    audio_out = gr.Audio(label="Audio", interactive=False)
                     
                     with gr.Row():
                         score_slider = gr.Slider(1, 5, 3, step=1, label="Score (1-5)", scale=1)
@@ -457,6 +511,11 @@ def create_app():
             outputs=[load_status, sample_text, translation, sample_info, sample_idx, progress]
         )
         
+        clear_btn.click(
+            fn=clear_progress,
+            outputs=[load_status, progress]
+        )
+        
         prev_btn.click(
             fn=navigate_prev,
             outputs=[sample_text, translation, sample_info, sample_idx, progress]
@@ -481,6 +540,7 @@ def create_app():
         **Tips:** 
         - Generate audio for each speaker tab, listen, and score
         - Scores persist when navigating between samples
+        - Progress auto-saves after each evaluation
         - Export your results when finished
         
         *MALIBA-AI - AI for Mali's Languages* 🇲🇱
@@ -490,9 +550,12 @@ def create_app():
 
 
 if __name__ == "__main__":
+    EXPORT_DIR.mkdir(exist_ok=True)
+    
     app = create_app()
     app.launch(
         server_name="0.0.0.0", 
         server_port=7860, 
-        share=False
+        share=False,
+        allowed_paths=[str(EXPORT_DIR)]
     )
