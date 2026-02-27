@@ -7,26 +7,23 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 
-from google import genai
-from google.genai import types
+
+from maliba_ai.tts.inference import BambaraTTSInference
+from maliba_ai.config.settings import Speakers
 
 
-# Maps evaluation speaker names → Gemini prebuilt voice names
 SPEAKERS = {
-    "Aoede":    "Bright and expressive",
-    "Charon":   "Deep and authoritative",
-    "Fenrir":   "Confident and clear",
-    "Kore":     "Warm and friendly",
-    "Leda":     "Calm and measured",
-    "Orus":     "Natural conversational tone",
-    "Puck":     "Youthful and energetic",
-    "Schedar":  "Melodic and smooth",
-    "Zephyr":   "Balanced characteristics",
-    "Achird":   "Expressive delivery",
+    "Bourama": "Most stable and accurate",
+    "Adama": "Natural conversational tone", 
+    "Moussa": "Clear pronunciation",
+    "Modibo": "Expressive delivery",
+    "Seydou": "Balanced characteristics",
+    "Amadou": "Warm and friendly voice",
+    "Bakary": "Deep, authoritative tone",
+    "Ngolo": "Youthful and energetic",
+    "Ibrahima": "Calm and measured",
+    "Amara": "Melodic and smooth",
 }
-
-GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"
-GEMINI_SAMPLE_RATE = 24000  # Gemini TTS returns 24 kHz Linear16 PCM
 
 SPEAKER_LIST = list(SPEAKERS.keys())
 
@@ -38,22 +35,13 @@ class AppState:
     def __init__(self):
         self.samples: List[Dict] = []
         self.current_idx: int = 0
-        self.scores: Dict[str, Dict[str, Dict]] = {}
-        self.audio_cache: Dict[str, Dict[str, Tuple]] = {}
+        self.scores: Dict[str, Dict[str, Dict]] = {} 
+        self.audio_cache: Dict[str, Dict[str, Tuple]] = {} 
         self.dataset_path: Optional[str] = None
-        self.gemini_client: Optional[genai.Client] = None
-
+        self.tts = None
+        
         EXPORT_DIR.mkdir(exist_ok=True)
-
-    def set_api_key(self, api_key: str) -> str:
-        """Initialize (or re-initialize) the Gemini client with the given API key."""
-        try:
-            self.gemini_client = genai.Client(api_key=api_key.strip())
-            self.audio_cache = {}  # invalidate cache when key changes
-            return "✓ Gemini API key accepted"
-        except Exception as e:
-            self.gemini_client = None
-            return f"✗ Failed to set API key: {e}"
+        self.tts = BambaraTTSInference()
 
     
     def load_dataset(self, filepath: str) -> str:
@@ -105,51 +93,42 @@ class AppState:
             return self.samples[idx]
         return None
     
-    def generate_audio(self, speaker: str) -> Tuple:
+    def generate_audio(self, speaker: str, temp: float, top_k: int, top_p: float, max_tokens: int) -> Tuple:
         sample = self.get_sample()
         if not sample:
             return None
-
-        cache_key = f"{sample['id']}_{speaker}"
+        
+        cache_key = f"{sample['id']}_{speaker}_{temp}_{top_k}_{top_p}"
         if sample['id'] in self.audio_cache and cache_key in self.audio_cache[sample['id']]:
             return self.audio_cache[sample['id']][cache_key]
-
-        if self.gemini_client:
+        
+        if self.tts:
             try:
-                voice_name = speaker  # speaker names map 1-to-1 with Gemini voice names
-                response = self.gemini_client.models.generate_content(
-                    model=GEMINI_TTS_MODEL,
-                    contents=sample["text"],
-                    config=types.GenerateContentConfig(
-                        response_modalities=["AUDIO"],
-                        speech_config=types.SpeechConfig(
-                            voice_config=types.VoiceConfig(
-                                prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                                    voice_name=voice_name,
-                                )
-                            )
-                        ),
-                    ),
+                speaker_enum = getattr(Speakers, speaker, Speakers.Bourama)
+                audio = self.tts.generate_speech(
+                    text=sample["text"],
+                    speaker_id=speaker_enum,
+                    temperature=temp,
+                    top_k=top_k,
+                    top_p=top_p,
+                    max_new_audio_tokens=max_tokens
                 )
-                # Gemini returns raw Linear16 PCM bytes
-                audio_data = response.candidates[0].content.parts[0].inline_data.data
-                audio_array = np.frombuffer(audio_data, dtype=np.int16).astype(np.float32) / 32768.0
-                result = (GEMINI_SAMPLE_RATE, audio_array)
+                result = (16000, audio)
             except Exception as e:
-                print(f"Gemini TTS error: {e}")
+                print(f"TTS error: {e}")
                 result = self._demo_audio(sample["text"], speaker)
         else:
             result = self._demo_audio(sample["text"], speaker)
-
+        
         if sample['id'] not in self.audio_cache:
             self.audio_cache[sample['id']] = {}
         self.audio_cache[sample['id']][cache_key] = result
-
+        
         return result
-
+    
     def _demo_audio(self, text: str, speaker: str) -> Tuple:
         duration = min(0.08 * len(text), 4.0)
-        sr = GEMINI_SAMPLE_RATE
+        sr = 16000
         t = np.linspace(0, duration, int(sr * duration))
         freq = 150 + SPEAKER_LIST.index(speaker) * 15 if speaker in SPEAKER_LIST else 150
         audio = 0.5 * np.sin(2 * np.pi * freq * t)
@@ -221,7 +200,7 @@ class AppState:
         self.audio_cache = {}
     
     def export_csv(self) -> str:
-        filepath = EXPORT_DIR / f"gemini_tts_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        filepath = EXPORT_DIR / f"bambara_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         sample_lookup = {s['id']: s for s in self.samples}
         
         with open(filepath, 'w', newline='', encoding='utf-8') as f:
@@ -240,7 +219,7 @@ class AppState:
         return str(filepath)
     
     def export_json(self) -> str:
-        filepath = EXPORT_DIR / f"gemini_tts_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        filepath = EXPORT_DIR / f"bambara_eval_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         
         export_data = {
             "export_time": datetime.now().isoformat(),
@@ -263,10 +242,6 @@ class AppState:
 
 
 state = AppState()
-
-
-def set_api_key(api_key: str) -> str:
-    return state.set_api_key(api_key)
 
 
 def load_data(file):
@@ -322,123 +297,123 @@ def clear_progress():
     return "✓ Progress cleared", state.progress_stats()
 
 
-def generate_Aoede():
-    audio = state.generate_audio("Aoede")
-    saved_score, saved_notes = state.get_score("Aoede")
+def generate_Bourama(temp, top_k, top_p, max_tokens):
+    audio = state.generate_audio("Bourama", temp, int(top_k), top_p, int(max_tokens))
+    saved_score, saved_notes = state.get_score("Bourama")
     return audio, saved_score, saved_notes
 
-def generate_Charon():
-    audio = state.generate_audio("Charon")
-    saved_score, saved_notes = state.get_score("Charon")
+def generate_Adama(temp, top_k, top_p, max_tokens):
+    audio = state.generate_audio("Adama", temp, int(top_k), top_p, int(max_tokens))
+    saved_score, saved_notes = state.get_score("Adama")
     return audio, saved_score, saved_notes
 
-def generate_Fenrir():
-    audio = state.generate_audio("Fenrir")
-    saved_score, saved_notes = state.get_score("Fenrir")
+def generate_Moussa(temp, top_k, top_p, max_tokens):
+    audio = state.generate_audio("Moussa", temp, int(top_k), top_p, int(max_tokens))
+    saved_score, saved_notes = state.get_score("Moussa")
     return audio, saved_score, saved_notes
 
-def generate_Kore():
-    audio = state.generate_audio("Kore")
-    saved_score, saved_notes = state.get_score("Kore")
+def generate_Modibo(temp, top_k, top_p, max_tokens):
+    audio = state.generate_audio("Modibo", temp, int(top_k), top_p, int(max_tokens))
+    saved_score, saved_notes = state.get_score("Modibo")
     return audio, saved_score, saved_notes
 
-def generate_Leda():
-    audio = state.generate_audio("Leda")
-    saved_score, saved_notes = state.get_score("Leda")
+def generate_Seydou(temp, top_k, top_p, max_tokens):
+    audio = state.generate_audio("Seydou", temp, int(top_k), top_p, int(max_tokens))
+    saved_score, saved_notes = state.get_score("Seydou")
     return audio, saved_score, saved_notes
 
-def generate_Orus():
-    audio = state.generate_audio("Orus")
-    saved_score, saved_notes = state.get_score("Orus")
+def generate_Amadou(temp, top_k, top_p, max_tokens):
+    audio = state.generate_audio("Amadou", temp, int(top_k), top_p, int(max_tokens))
+    saved_score, saved_notes = state.get_score("Amadou")
     return audio, saved_score, saved_notes
 
-def generate_Puck():
-    audio = state.generate_audio("Puck")
-    saved_score, saved_notes = state.get_score("Puck")
+def generate_Bakary(temp, top_k, top_p, max_tokens):
+    audio = state.generate_audio("Bakary", temp, int(top_k), top_p, int(max_tokens))
+    saved_score, saved_notes = state.get_score("Bakary")
     return audio, saved_score, saved_notes
 
-def generate_Schedar():
-    audio = state.generate_audio("Schedar")
-    saved_score, saved_notes = state.get_score("Schedar")
+def generate_Ngolo(temp, top_k, top_p, max_tokens):
+    audio = state.generate_audio("Ngolo", temp, int(top_k), top_p, int(max_tokens))
+    saved_score, saved_notes = state.get_score("Ngolo")
     return audio, saved_score, saved_notes
 
-def generate_Zephyr():
-    audio = state.generate_audio("Zephyr")
-    saved_score, saved_notes = state.get_score("Zephyr")
+def generate_Ibrahima(temp, top_k, top_p, max_tokens):
+    audio = state.generate_audio("Ibrahima", temp, int(top_k), top_p, int(max_tokens))
+    saved_score, saved_notes = state.get_score("Ibrahima")
     return audio, saved_score, saved_notes
 
-def generate_Achird():
-    audio = state.generate_audio("Achird")
-    saved_score, saved_notes = state.get_score("Achird")
+def generate_Amara(temp, top_k, top_p, max_tokens):
+    audio = state.generate_audio("Amara", temp, int(top_k), top_p, int(max_tokens))
+    saved_score, saved_notes = state.get_score("Amara")
     return audio, saved_score, saved_notes
 
 
 GENERATE_FUNCTIONS = {
-    "Aoede":   generate_Aoede,
-    "Charon":  generate_Charon,
-    "Fenrir":  generate_Fenrir,
-    "Kore":    generate_Kore,
-    "Leda":    generate_Leda,
-    "Orus":    generate_Orus,
-    "Puck":    generate_Puck,
-    "Schedar": generate_Schedar,
-    "Zephyr":  generate_Zephyr,
-    "Achird":  generate_Achird,
+    "Bourama": generate_Bourama,
+    "Adama": generate_Adama,
+    "Moussa": generate_Moussa,
+    "Modibo": generate_Modibo,
+    "Seydou": generate_Seydou,
+    "Amadou": generate_Amadou,
+    "Bakary": generate_Bakary,
+    "Ngolo": generate_Ngolo,
+    "Ibrahima": generate_Ibrahima,
+    "Amara": generate_Amara,
 }
 
 
-def save_Aoede(score, notes):
-    state.save_score("Aoede", int(score), notes or "")
-    return "✓ Saved score for Aoede", state.progress_stats()
+def save_Bourama(score, notes):
+    state.save_score("Bourama", int(score), notes or "")
+    return "✓ Saved score for Bourama", state.progress_stats()
 
-def save_Charon(score, notes):
-    state.save_score("Charon", int(score), notes or "")
-    return "✓ Saved score for Charon", state.progress_stats()
+def save_Adama(score, notes):
+    state.save_score("Adama", int(score), notes or "")
+    return "✓ Saved score for Adama", state.progress_stats()
 
-def save_Fenrir(score, notes):
-    state.save_score("Fenrir", int(score), notes or "")
-    return "✓ Saved score for Fenrir", state.progress_stats()
+def save_Moussa(score, notes):
+    state.save_score("Moussa", int(score), notes or "")
+    return "✓ Saved score for Moussa", state.progress_stats()
 
-def save_Kore(score, notes):
-    state.save_score("Kore", int(score), notes or "")
-    return "✓ Saved score for Kore", state.progress_stats()
+def save_Modibo(score, notes):
+    state.save_score("Modibo", int(score), notes or "")
+    return "✓ Saved score for Modibo", state.progress_stats()
 
-def save_Leda(score, notes):
-    state.save_score("Leda", int(score), notes or "")
-    return "✓ Saved score for Leda", state.progress_stats()
+def save_Seydou(score, notes):
+    state.save_score("Seydou", int(score), notes or "")
+    return "✓ Saved score for Seydou", state.progress_stats()
 
-def save_Orus(score, notes):
-    state.save_score("Orus", int(score), notes or "")
-    return "✓ Saved score for Orus", state.progress_stats()
+def save_Amadou(score, notes):
+    state.save_score("Amadou", int(score), notes or "")
+    return "✓ Saved score for Amadou", state.progress_stats()
 
-def save_Puck(score, notes):
-    state.save_score("Puck", int(score), notes or "")
-    return "✓ Saved score for Puck", state.progress_stats()
+def save_Bakary(score, notes):
+    state.save_score("Bakary", int(score), notes or "")
+    return "✓ Saved score for Bakary", state.progress_stats()
 
-def save_Schedar(score, notes):
-    state.save_score("Schedar", int(score), notes or "")
-    return "✓ Saved score for Schedar", state.progress_stats()
+def save_Ngolo(score, notes):
+    state.save_score("Ngolo", int(score), notes or "")
+    return "✓ Saved score for Ngolo", state.progress_stats()
 
-def save_Zephyr(score, notes):
-    state.save_score("Zephyr", int(score), notes or "")
-    return "✓ Saved score for Zephyr", state.progress_stats()
+def save_Ibrahima(score, notes):
+    state.save_score("Ibrahima", int(score), notes or "")
+    return "✓ Saved score for Ibrahima", state.progress_stats()
 
-def save_Achird(score, notes):
-    state.save_score("Achird", int(score), notes or "")
-    return "✓ Saved score for Achird", state.progress_stats()
+def save_Amara(score, notes):
+    state.save_score("Amara", int(score), notes or "")
+    return "✓ Saved score for Amara", state.progress_stats()
 
 
 SAVE_FUNCTIONS = {
-    "Aoede":   save_Aoede,
-    "Charon":  save_Charon,
-    "Fenrir":  save_Fenrir,
-    "Kore":    save_Kore,
-    "Leda":    save_Leda,
-    "Orus":    save_Orus,
-    "Puck":    save_Puck,
-    "Schedar": save_Schedar,
-    "Zephyr":  save_Zephyr,
-    "Achird":  save_Achird,
+    "Bourama": save_Bourama,
+    "Adama": save_Adama,
+    "Moussa": save_Moussa,
+    "Modibo": save_Modibo,
+    "Seydou": save_Seydou,
+    "Amadou": save_Amadou,
+    "Bakary": save_Bakary,
+    "Ngolo": save_Ngolo,
+    "Ibrahima": save_Ibrahima,
+    "Amara": save_Amara,
 }
 
 
@@ -455,77 +430,74 @@ def export_results_json():
 
 
 def create_app():
-    with gr.Blocks(title="Gemini TTS Eval") as app:
-
+    with gr.Blocks(title="Bambara TTS Eval") as app:
+        
         gr.Markdown("""
-        # Gemini TTS Evaluation
-        **Set API Key → Load → Generate → Listen → Score → Navigate → Export**
-
+        # MALIBA-AI Bambara TTS Evaluation
+        **Load → Generate → Listen → Score → Navigate → Export**
+        
         *Auto-save enabled: Your progress is saved automatically after each score.*
         """)
-
+        
         with gr.Row():
             with gr.Column(scale=2):
                 file_input = gr.File(label="📁 Upload Test Dataset (JSON)", file_types=[".json"])
                 load_status = gr.Textbox(label="Status", interactive=False)
                 clear_btn = gr.Button("🗑️ Clear Saved Progress", size="sm")
-
+            
             with gr.Column(scale=1):
-                gr.Markdown("**Gemini API Key**")
-                api_key_input = gr.Textbox(
-                    label="API Key",
-                    placeholder="Enter your Gemini API key…",
-                    type="password",
-                )
-                api_key_btn = gr.Button("Set API Key", variant="primary")
-                api_key_status = gr.Textbox(label="", interactive=False)
-
+                gr.Markdown("**Generation Parameters**")
+                temp = gr.Slider(0.1, 1.5, 0.8, step=0.1, label="Temperature")
+                top_k = gr.Slider(1, 100, 50, step=5, label="Top-K")
+                top_p = gr.Slider(0.1, 1.0, 1.0, step=0.05, label="Top-P")
+                max_tok = gr.Slider(512, 4096, 2048, step=256, label="Max Tokens")
+        
         gr.Markdown("---")
-
+        
         with gr.Row():
             prev_btn = gr.Button("⬅️ Previous", size="sm")
             sample_idx = gr.Number(value=0, label="Sample #", precision=0, scale=1)
             next_btn = gr.Button("Next ➡️", size="sm")
             progress = gr.Textbox(label="Progress", interactive=False, scale=2)
-
+        
         sample_info = gr.Textbox(label="Sample Info", interactive=False)
-        sample_text = gr.Textbox(label="Text", lines=2, interactive=False)
+        sample_text = gr.Textbox(label="Bambara Text", lines=2, interactive=False)
         translation = gr.Textbox(label="Translation", lines=1, interactive=False)
-
+        
         gr.Markdown("---")
-
-        gr.Markdown("### 🎧 Voice Evaluation (MOS: 1=Poor, 5=Excellent)")
-
+        
+        gr.Markdown("### 🎧 Speaker Evaluation (MOS: 1=Poor, 5=Excellent)")
+        
         with gr.Tabs():
             for speaker, desc in SPEAKERS.items():
                 with gr.Tab(f"{speaker}"):
-                    gr.Markdown(f"**{speaker}** — {desc}")
-
+                    gr.Markdown(f"**{speaker}** - {desc}")
+                    
                     gen_btn = gr.Button("🎵 Generate Audio", variant="primary")
                     audio_out = gr.Audio(label="Audio", interactive=False)
-
+                    
                     with gr.Row():
                         score_slider = gr.Slider(1, 5, 3, step=1, label="Score (1-5)", scale=1)
                         notes_input = gr.Textbox(label="Notes", placeholder="Optional notes...", scale=2)
-
+                    
                     with gr.Row():
                         save_btn = gr.Button("💾 Save Score", variant="secondary")
                         save_status = gr.Textbox(label="", interactive=False, scale=2)
-
+                    
                     gen_btn.click(
                         fn=GENERATE_FUNCTIONS[speaker],
-                        inputs=[],
+                        inputs=[temp, top_k, top_p, max_tok],
                         outputs=[audio_out, score_slider, notes_input]
                     )
-
+                    
                     save_btn.click(
                         fn=SAVE_FUNCTIONS[speaker],
                         inputs=[score_slider, notes_input],
                         outputs=[save_status, progress]
                     )
-
+        
         gr.Markdown("---")
-
+        
         gr.Markdown("### 📤 Export Results")
         with gr.Row():
             export_csv_btn = gr.Button("Export CSV")
@@ -538,13 +510,7 @@ def create_app():
             inputs=[file_input],
             outputs=[load_status, sample_text, translation, sample_info, sample_idx, progress]
         )
-
-        api_key_btn.click(
-            fn=set_api_key,
-            inputs=[api_key_input],
-            outputs=[api_key_status]
-        )
-
+        
         clear_btn.click(
             fn=clear_progress,
             outputs=[load_status, progress]
@@ -571,12 +537,13 @@ def create_app():
         
         gr.Markdown("""
         ---
-        **Tips:**
-        - Set your Gemini API key first, then load a dataset
-        - Generate audio for each voice tab, listen, and score
+        **Tips:** 
+        - Generate audio for each speaker tab, listen, and score
         - Scores persist when navigating between samples
         - Progress auto-saves after each evaluation
         - Export your results when finished
+        
+        *MALIBA-AI - AI for Mali's Languages* 🇲🇱
         """)
     
     return app
