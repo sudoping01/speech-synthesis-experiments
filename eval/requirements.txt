@@ -1,2 +1,2 @@
 gradio
-google-genai
+git+https://github.com/MALIBA-AI/bambara-tts
